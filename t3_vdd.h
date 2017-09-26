@@ -13,12 +13,8 @@ public:
 
   void begin(ADC* adc)
   {
+    static Enable Vref;
     m_pAdc = adc;
-    // enable VREF_OUT buffer for Vdd measurement
-    VREF_TRM |= VREF_TRM_CHOPEN;
-    VREF_SC = VREF_SC_VREFEN | VREF_SC_REGEN | VREF_SC_ICOMPEN | VREF_SC_MODE_LV(2);
-    while(!(VREF_SC & VREF_SC_VREFST))
-    { }
   }
 
   void update()
@@ -30,8 +26,20 @@ public:
     }
   }
 private:
-  uint16_t m_vdd;
+  static uint16_t m_vdd;
   ADC* m_pAdc;
+  class Enable
+  {
+  public:
+    Enable()
+    {
+      // enable VREF_OUT buffer for Vdd measurement
+      VREF_TRM |= VREF_TRM_CHOPEN;
+      VREF_SC = VREF_SC_VREFEN | VREF_SC_REGEN | VREF_SC_ICOMPEN | VREF_SC_MODE_LV(2);
+      while(!(VREF_SC & VREF_SC_VREFST))
+      { }
+    }
+  };
 };
 
 #endif // T3_VDD_H
